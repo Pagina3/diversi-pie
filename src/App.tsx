@@ -12,9 +12,10 @@ import { PautaObservacionEditor } from './components/PautaObservacionEditor';
 import { ReportDocumentPreview } from './components/ReportDocumentPreview';
 import { StudentFolderView } from './components/StudentFolderView';
 import { BancoEvaluacionesView } from './components/BancoEvaluacionesView';
+import { TabulatestView } from './components/TabulatestView';
 import { NormativaMineducModal } from './components/NormativaMineducModal';
 
-import { EstudiantePIE, InformePIE } from './types/pie';
+import { EstudiantePIE, InformePIE, BateriaEvaluacionInformal } from './types/pie';
 import { otrosEstudiantes, estudianteInicial, informeInicial } from './data/defaultData';
 import { exportarInformeADocx } from './utils/docxExporter';
 import { generarRedaccionPedagogica } from './utils/pedagogicalAI';
@@ -24,7 +25,7 @@ import {
   Calculator, 
   FileText, 
   FileCheck2, 
-  Folder, 
+  ClipboardList, 
   Menu 
 } from 'lucide-react';
 
@@ -41,10 +42,26 @@ export function App() {
 
   const [informe, setInforme] = useState<InformePIE>(() => {
     const saved = localStorage.getItem('diversi_pie_informe_actual');
-    return saved ? JSON.parse(saved) : informeInicial;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Ensure teacher information matches user request
+        parsed.profesional = {
+          nombre: "Francisca Lorena Tello Rojas",
+          rut: "21.232.592-9",
+          profesion: "Profesora Diferencial mención Discapacidad Intelectual",
+          registroMineduc: parsed.profesional?.registroMineduc || "145892",
+          cargo: "Educadora Diferencial PIE / Especialista"
+        };
+        return parsed;
+      } catch (e) {
+        return informeInicial;
+      }
+    }
+    return informeInicial;
   });
 
-  const [currentTab, setCurrentTab] = useState<string>('evaluacion-cuantitativa');
+  const [currentTab, setCurrentTab] = useState<string>('tabulatest');
   const [isModalNormativaOpen, setIsModalNormativaOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -129,6 +146,17 @@ export function App() {
     }
   };
 
+  const handleCargarBateriaTabulatest = (bateria: BateriaEvaluacionInformal) => {
+    setInforme(prev => ({
+      ...prev,
+      evaluacionInformal: bateria,
+      instrumentosAplicados: prev.instrumentosAplicados.includes(bateria.nombre)
+        ? prev.instrumentosAplicados
+        : `${prev.instrumentosAplicados}, ${bateria.nombre}`
+    }));
+    showToast(`Batería "${bateria.nombre}" vinculada al informe con éxito.`);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100 font-sans">
       {/* Toast Notification */}
@@ -174,6 +202,15 @@ export function App() {
         {/* Scrollable Workspace */}
         <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 custom-scrollbar">
           <div className="max-w-5xl mx-auto">
+            {currentTab === 'tabulatest' && (
+              <TabulatestView
+                bateriaActual={informe.evaluacionInformal}
+                estudiante={estudianteSeleccionado}
+                onCargarBateria={handleCargarBateriaTabulatest}
+                onGenerarAnalisis={handleGenerarIA}
+              />
+            )}
+
             {currentTab === 'identificacion' && (
               <SectionIdentificacion
                 estudiante={estudianteSeleccionado}
@@ -274,6 +311,16 @@ export function App() {
         {/* MOBILE STICKY BOTTOM NAVIGATION BAR */}
         <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-30 px-2 py-1.5 flex items-center justify-around shadow-lg">
           <button
+            onClick={() => setCurrentTab('tabulatest')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition ${
+              currentTab === 'tabulatest' ? 'text-indigo-700 bg-indigo-50' : 'text-slate-500'
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            <span>Tabulatest</span>
+          </button>
+
+          <button
             onClick={() => setCurrentTab('evaluacion-cuantitativa')}
             className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition ${
               currentTab === 'evaluacion-cuantitativa' ? 'text-teal-700 bg-teal-50' : 'text-slate-500'
@@ -291,16 +338,6 @@ export function App() {
           >
             <FileText className="w-4 h-4" />
             <span>Informe</span>
-          </button>
-
-          <button
-            onClick={() => setCurrentTab('pauta-observacion')}
-            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition ${
-              currentTab === 'pauta-observacion' ? 'text-teal-700 bg-teal-50' : 'text-slate-500'
-            }`}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Pauta C4</span>
           </button>
 
           <button

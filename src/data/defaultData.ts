@@ -1,4 +1,4 @@
-import { EstudiantePIE, InformePIE, BateriaEvaluacionInformal } from '../types/pie';
+import type { EstudiantePIE, InformePIE, BateriaEvaluacionInformal } from '../types/pie';
 
 export const indicadoresPedagogicosBase = [
   "Demuestra comprensión de instrucciones orales, escritas o en lengua de señas, respondiendo a ellas de acuerdo con sus posibilidades comunicativas y utilizando los apoyos necesarios.",
@@ -119,6 +119,205 @@ export const bateria1MedioDiversi: BateriaEvaluacionInformal = {
   ]
 };
 
+export const bateriasTabulatestCatalogo: BateriaEvaluacionInformal[] = [
+  bateria1MedioDiversi,
+  {
+    id: "tabulatest-r3-basica-4",
+    nombre: "Prueba Informal Psicopedagógica Tabulatest (R-3) - 4° Básico",
+    cursoNivel: "4° Básico",
+    areas: [
+      {
+        id: "tab-cog-4",
+        nombre: "Área Cognitiva y Procesamiento",
+        subareas: [
+          {
+            id: "sub-tab-cog-4",
+            nombre: "Funciones Ejecutivas y Atención",
+            items: [
+              { id: "tc4-1", numero: 1, nombre: "Atención focalizada y selectiva visual", ptjeIdeal: 10, ptjeObtenido: 8 },
+              { id: "tc4-2", numero: 2, nombre: "Memoria visual inmediata y retención secuencial", ptjeIdeal: 10, ptjeObtenido: 7 },
+              { id: "tc4-3", numero: 3, nombre: "Razonamiento analógico y clasificación lógica", ptjeIdeal: 12, ptjeObtenido: 9 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-len-4",
+        nombre: "Área Lectoescritura Tabulatest",
+        subareas: [
+          {
+            id: "sub-tab-lec-4",
+            nombre: "Lectura y Comprensión",
+            items: [
+              { id: "tl4-1", numero: 1, nombre: "Exactitud y fluidez lectora (palabras por minuto)", ptjeIdeal: 10, ptjeObtenido: 6 },
+              { id: "tl4-2", numero: 2, nombre: "Comprensión explícita e identificación de personajes", ptjeIdeal: 8, ptjeObtenido: 7 },
+              { id: "tl4-3", numero: 3, nombre: "Comprensión inferencial y causa-efecto", ptjeIdeal: 8, ptjeObtenido: 4 }
+            ]
+          },
+          {
+            id: "sub-tab-esc-4",
+            nombre: "Producción Escrita y Ortografía",
+            items: [
+              { id: "te4-1", numero: 1, nombre: "Ortografía acentual y puntual básica", ptjeIdeal: 10, ptjeObtenido: 5 },
+              { id: "te4-2", numero: 2, nombre: "Coherencia temática en redacción de párrafo", ptjeIdeal: 10, ptjeObtenido: 6 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-mat-4",
+        nombre: "Área de Cálculo y Pensamiento Matemático",
+        subareas: [
+          {
+            id: "sub-tab-mat-4",
+            nombre: "Operaciones y Resolución de Problemas",
+            items: [
+              { id: "tm4-1", numero: 1, nombre: "Numeración hasta el 10.000 y valor posicional", ptjeIdeal: 10, ptjeObtenido: 8 },
+              { id: "tm4-2", numero: 2, nombre: "Operatoria combinada (adición, sustracción, multiplicación)", ptjeIdeal: 10, ptjeObtenido: 7 },
+              { id: "tm4-3", numero: 3, nombre: "Resolución de problemas verbales simples y compuestos", ptjeIdeal: 12, ptjeObtenido: 6 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "tabulatest-r3-basica-8",
+    nombre: "Prueba Informal Psicopedagógica Tabulatest (R-3) - 8° Básico",
+    cursoNivel: "8° Básico",
+    areas: [
+      {
+        id: "tab-cog-8",
+        nombre: "Procesos Cognitivos Superiores",
+        subareas: [
+          {
+            id: "sub-tab-cog-8",
+            nombre: "Atención, Memoria y Planificación",
+            items: [
+              { id: "tc8-1", numero: 1, nombre: "Control inhibitorio y flexibilidad mental", ptjeIdeal: 15, ptjeObtenido: 11 },
+              { id: "tc8-2", numero: 2, nombre: "Memoria operativa de dígitos en orden inverso", ptjeIdeal: 10, ptjeObtenido: 6 },
+              { id: "tc8-3", numero: 3, nombre: "Planificación de secuencias y laberintos complejos", ptjeIdeal: 15, ptjeObtenido: 12 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-len-8",
+        nombre: "Comprensión y Análisis Lingüístico",
+        subareas: [
+          {
+            id: "sub-tab-lec-8",
+            nombre: "Lectura Crítica",
+            items: [
+              { id: "tl8-1", numero: 1, nombre: "Inferencia global y propósito del emisor", ptjeIdeal: 12, ptjeObtenido: 8 },
+              { id: "tl8-2", numero: 2, nombre: "Diferenciación de hechos y opiniones", ptjeIdeal: 8, ptjeObtenido: 5 },
+              { id: "tl8-3", numero: 3, nombre: "Síntesis y elaboración de resumen textual", ptjeIdeal: 10, ptjeObtenido: 6 }
+            ]
+          },
+          {
+            id: "sub-tab-esc-8",
+            nombre: "Escritura Argumentativa",
+            items: [
+              { id: "te8-1", numero: 1, nombre: "Estructura argumentativa (tesis, argumento, conclusión)", ptjeIdeal: 15, ptjeObtenido: 9 },
+              { id: "te8-2", numero: 2, nombre: "Conectores lógicos y riqueza léxica", ptjeIdeal: 10, ptjeObtenido: 6 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-mat-8",
+        nombre: "Pensamiento Matemático Curricular",
+        subareas: [
+          {
+            id: "sub-tab-mat-8",
+            nombre: "Álgebra y Números Racionales",
+            items: [
+              { id: "tm8-1", numero: 1, nombre: "Operatoria con fracciones y decimales positivos/negativos", ptjeIdeal: 12, ptjeObtenido: 6 },
+              { id: "tm8-2", numero: 2, nombre: "Ecuaciones e inecuaciones de primer grado", ptjeIdeal: 12, ptjeObtenido: 5 },
+              { id: "tm8-3", numero: 3, nombre: "Cálculo de áreas y perímetros en polígonos", ptjeIdeal: 10, ptjeObtenido: 7 },
+              { id: "tm8-4", numero: 4, nombre: "Modelamiento de problemas con variables", ptjeIdeal: 12, ptjeObtenido: 6 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "tabulatest-fonoaudiologica",
+    nombre: "Evaluación Informal Fonoaudiológica Tabulatest",
+    cursoNivel: "Enseñanza Básica y Media",
+    areas: [
+      {
+        id: "fono-fonetica",
+        nombre: "Nivel Fonético - Fonológico",
+        subareas: [
+          {
+            id: "sub-fono-1",
+            nombre: "Metría y Conciencia Fonológica",
+            items: [
+              { id: "ff-1", numero: 1, nombre: "Segmentación y conteo silábico", ptjeIdeal: 10, ptjeObtenido: 9 },
+              { id: "ff-2", numero: 2, nombre: "Identificación de sonido vocálico y consonántico inicial/final", ptjeIdeal: 10, ptjeObtenido: 8 },
+              { id: "ff-3", numero: 3, nombre: "Inversión y manipulación fonémica", ptjeIdeal: 10, ptjeObtenido: 6 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "fono-semantica",
+        nombre: "Nivel Semántico y Vocabulario",
+        subareas: [
+          {
+            id: "sub-fono-2",
+            nombre: "Relaciones Léxicas",
+            items: [
+              { id: "fs-1", numero: 1, nombre: "Definición de palabras por categoría y uso", ptjeIdeal: 12, ptjeObtenido: 8 },
+              { id: "fs-2", numero: 2, nombre: "Asociación por semejanzas y diferencias léxicas", ptjeIdeal: 10, ptjeObtenido: 7 },
+              { id: "fs-3", numero: 3, nombre: "Comprensión de lenguaje figurado y metáforas simples", ptjeIdeal: 10, ptjeObtenido: 5 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "fono-morfo-pragma",
+        nombre: "Nivel Morfosintáctico y Pragmático",
+        subareas: [
+          {
+            id: "sub-fono-3",
+            nombre: "Discurso y Comunicación Social",
+            items: [
+              { id: "fmp-1", numero: 1, nombre: "Estructuración de oraciones complejas con nexos", ptjeIdeal: 12, ptjeObtenido: 7 },
+              { id: "fmp-2", numero: 2, nombre: "Mantenimiento del tópico conversacional y toma de turnos", ptjeIdeal: 10, ptjeObtenido: 9 },
+              { id: "fmp-3", numero: 3, nombre: "Contacto visual, proxémica y comprensión de intenciones", ptjeIdeal: 10, ptjeObtenido: 8 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "tabulatest-estilos-vak",
+    nombre: "Test de Estilos de Aprendizaje PNL - VAK (Tabulatest)",
+    cursoNivel: "Todos los niveles",
+    areas: [
+      {
+        id: "vak-canales",
+        nombre: "Canales de Percepción y Procesamiento",
+        subareas: [
+          {
+            id: "sub-vak",
+            nombre: "Predominancia Perceptual",
+            items: [
+              { id: "vak-1", numero: 1, nombre: "Canal Visual (imágenes, esquemas, lectura visual)", ptjeIdeal: 20, ptjeObtenido: 16 },
+              { id: "vak-2", numero: 2, nombre: "Canal Auditivo (explicaciones orales, debate, repetición)", ptjeIdeal: 20, ptjeObtenido: 11 },
+              { id: "vak-3", numero: 3, nombre: "Canal Kinestésico (manipulación, acción corporal, práctica)", ptjeIdeal: 20, ptjeObtenido: 18 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+];
+
 export const estudianteInicial: EstudiantePIE = {
   id: "3400",
   nombreCompleto: "Fernanda Esperanza García Parra",
@@ -178,7 +377,7 @@ export const informeInicial: InformePIE = {
   establecimiento: "Colegio Ana María Janer",
   rbd: "9876-5",
   motivoDetalle: "Proceso de Reevaluación Integral del Programa de Integración Escolar (PIE) según normativa Decreto 170 y Decreto 83 de Educación Especial del Ministerio de Educación de Chile.",
-  instrumentosAplicados: "Evaluación psicopedagógica informal - Diversi (Nivel 1° Medio), Pauta de Observación Pedagógica en el Contexto Escolar (Cartilla 4 MINEDUC), Entrevista a la familia y revisión de antecedentes escolares previos.",
+  instrumentosAplicados: "Evaluación psicopedagógica informal - Diversi (Nivel 1° Medio), Prueba Informal Tabulatest (R-3), Pauta de Observación Pedagógica en el Contexto Escolar (Cartilla 4 MINEDUC), Entrevista a la familia y revisión de antecedentes escolares previos.",
   antecedentesHistoriaEscolar: "La estudiante cursa 1° Medio. Ha contado con apoyo del PIE en años anteriores bajo diagnóstico de TDAH. Presenta buen desempeño vincular con sus pares y docentes, sin embargo, en periodos de alta exigencia académica muestra dificultades para sostener la concentración en actividades de extensa duración y estructuración temporal de tareas.",
   antecedentesSaludFamilia: "Vive con sus padres y hermano menor. La familia muestra alto compromiso y asistencia a citaciones del equipo de aula. Cuenta con control neurológico regular.",
   evaluacionInformal: bateria1MedioDiversi,
@@ -220,10 +419,10 @@ export const informeInicial: InformePIE = {
     }
   },
   profesional: {
-    nombre: "Francisca Tello Rojas",
-    rut: "16.890.345-2",
-    profesion: "Educadora Diferencial con mención en Trastornos del Aprendizaje",
+    nombre: "Francisca Lorena Tello Rojas",
+    rut: "21.232.592-9",
+    profesion: "Profesora Diferencial mención Discapacidad Intelectual",
     registroMineduc: "145892",
-    cargo: "Coordinadora PIE / Especialista PIE"
+    cargo: "Educadora Diferencial PIE / Especialista"
   }
 };

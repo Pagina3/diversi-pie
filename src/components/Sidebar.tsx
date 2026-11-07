@@ -5,7 +5,10 @@ import {
   BookOpen, 
   FileCheck2, 
   ShieldCheck,
-  X
+  X,
+  Layers,
+  Sparkles,
+  ClipboardList
 } from 'lucide-react';
 import { EstudiantePIE } from '../types/pie';
 
@@ -155,6 +158,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <BookOpen className="w-4 h-4 text-sky-400 shrink-0" />
                 <span>Banco de Ev. Informales</span>
               </button>
+              <button
+                onClick={() => handleTabClick('tabulatest')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-colors ${
+                  currentTab === 'tabulatest'
+                    ? 'bg-teal-500/15 text-teal-300 font-semibold border-l-2 border-teal-400'
+                    : 'hover:bg-slate-800/60 text-slate-300'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 truncate">
+                  <ClipboardList className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <span className="truncate">Módulo Tabulatest (R-3)</span>
+                </div>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 shrink-0 font-mono">
+                  Nuevo
+                </span>
+              </button>
             </div>
           </div>
 
@@ -208,18 +227,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* User profile footer */}
+        {/* User profile footer with Francisca Lorena Tello Rojas */}
         <div className="p-3 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between">
           <div className="flex items-center gap-2.5 truncate">
             <div className="w-8 h-8 rounded-full bg-teal-700 text-white font-bold flex items-center justify-center text-xs shrink-0">
-              FT
+              FL
             </div>
             <div className="truncate">
-              <p className="text-xs font-semibold text-white truncate">Francisca Tello Rojas</p>
-              <p className="text-[10px] text-slate-400 truncate">Educadora Especial PIE</p>
+              <p className="text-xs font-semibold text-white truncate" title="Francisca Lorena Tello Rojas">
+                Francisca Lorena Tello Rojas
+              </p>
+              <p className="text-[10px] text-teal-400 truncate" title="RUT: 21.232.592-9">
+                RUT: 21.232.592-9
+              </p>
+              <p className="text-[10px] text-slate-400 truncate" title="Profesora Diferencial mención Discapacidad Intelectual">
+                Prof. Dif. Mención DI
+              </p>
             </div>
           </div>
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400" title="Sistema Activo" />
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400 shrink-0 ml-1" title="Sistema Activo" />
         </div>
       </aside>
     </>
