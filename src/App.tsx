@@ -15,9 +15,10 @@ import { StudentFolderView } from './components/StudentFolderView';
 import { BancoEvaluacionesView } from './components/BancoEvaluacionesView';
 import { TabulatestView } from './components/TabulatestView';
 import { NormativaMineducModal } from './components/NormativaMineducModal';
+import { StudentManagementModal } from './components/StudentManagementModal';
 
 import { EstudiantePIE, InformePIE, BateriaEvaluacionInformal } from './types/pie';
-import { otrosEstudiantes, estudianteInicial, informeInicial } from './data/defaultData';
+import { otrosEstudiantes, estudianteInicial, informeInicial, crearInformeParaEstudiante, profesorPredeterminado } from './data/defaultData';
 import { exportarInformeADocx } from './utils/docxExporter';
 import { generarRedaccionPedagogica } from './utils/pedagogicalAI';
 import confetti from 'canvas-confetti';
@@ -32,45 +33,77 @@ import {
 } from 'lucide-react';
 
 export function App() {
+  // 1. Estudiantes registrados
   const [estudiantes, setEstudiantes] = useState<EstudiantePIE[]>(() => {
     const saved = localStorage.getItem('diversi_pie_estudiantes');
-    return saved ? JSON.parse(saved) : otrosEstudiantes;
+    if (saved) {
+      try {
+        const parsed: EstudiantePIE[] = JSON.parse(saved);
+        // Ensure each student has tipoEvaluacion defined
+        return parsed.map(st => ({
+          ...st,
+          tipoEvaluacion: st.tipoEvaluacion || (st.id === '3400' ? 'diversi' : 'tabulatest')
+        }));
+      } catch (e) {
+        return otrosEstudiantes;
+      }
+    }
+    return otrosEstudiantes;
   });
 
+  // 2. Estudiante actualmente seleccionado
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<EstudiantePIE>(() => {
     const saved = localStorage.getItem('diversi_pie_estudiante_actual');
-    return saved ? JSON.parse(saved) : estudianteInicial;
-  });
-
-  const [informe, setInforme] = useState<InformePIE>(() => {
-    const saved = localStorage.getItem('diversi_pie_informe_actual');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Ensure teacher information matches user request
-        parsed.profesional = {
-          nombre: "Francisca Lorena Tello Rojas",
-          rut: "21.232.592-9",
-          profesion: "Profesora Diferencial mención Discapacidad Intelectual",
-          registroMineduc: parsed.profesional?.registroMineduc || "145892",
-          cargo: "Educadora Diferencial PIE / Especialista"
+        return {
+          ...parsed,
+          tipoEvaluacion: parsed.tipoEvaluacion || 'diversi'
         };
-        return parsed;
       } catch (e) {
-        return informeInicial;
+        return estudianteInicial;
       }
     }
-    return informeInicial;
+    return estudianteInicial;
   });
 
-  // Default to Diversi's Informal Evaluation tabulator
+  // 3. Mapa de informes individuales por estudiante (para que cada estudiante tenga su propio informe y no se sobreescriban)
+  const [informesMap, setInformesMap] = useState<Record<string, InformePIE>>(() => {
+    const saved = localStorage.getItem('diversi_pie_informes_map');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Ensure teacher information is up to date
+        Object.keys(parsed).forEach(key => {
+          parsed[key].profesional = profesorPredeterminado;
+        });
+        return parsed;
+      } catch (e) {}
+    }
+    return {
+      [estudianteInicial.id]: informeInicial
+    };
+  });
+
+  // Informe activo para el estudiante actual
+  const informe = informesMap[estudianteSeleccionado.id] || crearInformeParaEstudiante(estudianteSeleccionado);
+
+  const updateCurrentInforme = (nuevoInforme: InformePIE) => {
+    setInformesMap(prev => ({
+      ...prev,
+      [estudianteSeleccionado.id]: nuevoInforme
+    }));
+  };
+
   const [currentTab, setCurrentTab] = useState<string>('evaluacion-cuantitativa');
   const [isModalNormativaOpen, setIsModalNormativaOpen] = useState<boolean>(false);
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // Auto save to localStorage
+  // Persistence to localStorage
   useEffect(() => {
     localStorage.setItem('diversi_pie_estudiantes', JSON.stringify(estudiantes));
   }, [estudiantes]);
@@ -80,14 +113,70 @@ export function App() {
   }, [estudianteSeleccionado]);
 
   useEffect(() => {
-    localStorage.setItem('diversi_pie_informe_actual', JSON.stringify(informe));
-  }, [informe]);
+    localStorage.setItem('diversi_pie_informes_map', JSON.stringify(informesMap));
+  }, [informesMap]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
     }, 4000);
+  };
+
+  // Switch student & load their specific report
+  const handleSelectEstudiante = (st: EstudiantePIE) => {
+    setEstudianteSeleccionado(st);
+    if (!informesMap[st.id]) {
+      const nuevoInf = crearInformeParaEstudiante(st);
+      setInformesMap(prev => ({ ...prev, [st.id]: nuevoInf }));
+    }
+    // Set appropriate starting view according to student's assigned evaluation
+    if (st.tipoEvaluacion === 'tabulatest') {
+      setCurrentTab('tabulatest');
+    } else {
+      setCurrentTab('evaluacion-cuantitativa');
+    }
+    showToast(`Estudiante activo: ${st.nombreCompleto} (${st.tipoEvaluacion === 'diversi' ? 'Evaluación Diversi' : 'Evaluación Tabulatest'})`);
+  };
+
+  // Save or Add student
+  const handleGuardarEstudiante = (nuevoEstudiante: EstudiantePIE) => {
+    const existe = estudiantes.some(s => s.id === nuevoEstudiante.id);
+    if (existe) {
+      setEstudiantes(prev => prev.map(s => s.id === nuevoEstudiante.id ? nuevoEstudiante : s));
+      // Update student in current state if it's the active one
+      if (estudianteSeleccionado.id === nuevoEstudiante.id) {
+        setEstudianteSeleccionado(nuevoEstudiante);
+      }
+      showToast(`Ficha de ${nuevoEstudiante.nombreCompleto} actualizada correctamente.`);
+    } else {
+      setEstudiantes(prev => [...prev, nuevoEstudiante]);
+      // Create their independent report
+      const nuevoInf = crearInformeParaEstudiante(nuevoEstudiante);
+      setInformesMap(prev => ({ ...prev, [nuevoEstudiante.id]: nuevoInf }));
+      setEstudianteSeleccionado(nuevoEstudiante);
+      if (nuevoEstudiante.tipoEvaluacion === 'tabulatest') {
+        setCurrentTab('tabulatest');
+      } else {
+        setCurrentTab('evaluacion-cuantitativa');
+      }
+      showToast(`¡Estudiante ${nuevoEstudiante.nombreCompleto} agregado y listo con su evaluación!`);
+    }
+  };
+
+  // Delete student
+  const handleEliminarEstudiante = (id: string) => {
+    const filtrados = estudiantes.filter(s => s.id !== id);
+    setEstudiantes(filtrados);
+    setInformesMap(prev => {
+      const copia = { ...prev };
+      delete copia[id];
+      return copia;
+    });
+    if (estudianteSeleccionado.id === id && filtrados.length > 0) {
+      handleSelectEstudiante(filtrados[0]);
+    }
+    showToast("Estudiante eliminado del registro.");
   };
 
   const handleGuardar = () => {
@@ -100,12 +189,12 @@ export function App() {
 
   const handleGenerarIA = () => {
     const redaccion = generarRedaccionPedagogica(estudianteSeleccionado, informe.evaluacionInformal);
-    setInforme(prev => ({
-      ...prev,
+    updateCurrentInforme({
+      ...informe,
       analisisCualitativo: redaccion.analisisCualitativo,
       sintesis: redaccion.sintesis,
       sugerencias: redaccion.sugerencias
-    }));
+    });
 
     try {
       confetti({
@@ -150,15 +239,17 @@ export function App() {
   };
 
   const handleCargarBateriaTabulatest = (bateria: BateriaEvaluacionInformal) => {
-    setInforme(prev => ({
-      ...prev,
+    updateCurrentInforme({
+      ...informe,
       evaluacionInformal: bateria,
-      instrumentosAplicados: prev.instrumentosAplicados.includes(bateria.nombre)
-        ? prev.instrumentosAplicados
-        : `${prev.instrumentosAplicados}, ${bateria.nombre}`
-    }));
-    showToast(`Batería "${bateria.nombre}" cargada en el informe de Diversi.`);
+      instrumentosAplicados: informe.instrumentosAplicados.includes(bateria.nombre)
+        ? informe.instrumentosAplicados
+        : `${informe.instrumentosAplicados}, ${bateria.nombre}`
+    });
+    showToast(`Batería "${bateria.nombre}" asignada al estudiante.`);
   };
+
+  const esDiversi = (estudianteSeleccionado.tipoEvaluacion || 'diversi') === 'diversi';
 
   const isDiversiSection = [
     'identificacion', 
@@ -187,14 +278,26 @@ export function App() {
         onClose={() => setIsModalNormativaOpen(false)}
       />
 
+      {/* Student Management & Add Modal */}
+      <StudentManagementModal
+        isOpen={isStudentModalOpen}
+        onClose={() => setIsStudentModalOpen(false)}
+        estudiantes={estudiantes}
+        estudianteSeleccionado={estudianteSeleccionado}
+        onSelectEstudiante={handleSelectEstudiante}
+        onGuardarEstudiante={handleGuardarEstudiante}
+        onEliminarEstudiante={handleEliminarEstudiante}
+      />
+
       {/* Responsive Sidebar */}
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         estudiantes={estudiantes}
         estudianteSeleccionado={estudianteSeleccionado}
-        setEstudianteSeleccionado={setEstudianteSeleccionado}
+        setEstudianteSeleccionado={handleSelectEstudiante}
         onOpenNormativa={() => setIsModalNormativaOpen(true)}
+        onOpenGestionEstudiantes={() => setIsStudentModalOpen(true)}
         isMobileOpen={isMobileMenuOpen}
         setIsMobileOpen={setIsMobileMenuOpen}
       />
@@ -210,13 +313,14 @@ export function App() {
           onImprimir={handleImprimir}
           onGuardar={handleGuardar}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+          onOpenGestionEstudiantes={() => setIsStudentModalOpen(true)}
           isSaving={isSaving}
         />
 
         {/* Scrollable Workspace */}
         <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 custom-scrollbar">
           <div className="max-w-5xl mx-auto">
-            {/* DIVERSI STUDENT BANNER: Displayed on all Diversi report sections */}
+            {/* DIVERSI STUDENT BANNER: Displayed on report sections */}
             {isDiversiSection && (
               <DiversiStudentBanner
                 estudiante={estudianteSeleccionado}
@@ -237,34 +341,37 @@ export function App() {
               />
             )}
 
-            {/* DIVERSI REPORT SECTIONS */}
+            {/* DIVERSI / MINEDUC REPORT SECTIONS */}
             {currentTab === 'identificacion' && (
               <SectionIdentificacion
                 estudiante={estudianteSeleccionado}
                 informe={informe}
-                onEstudianteChange={setEstudianteSeleccionado}
-                onInformeChange={setInforme}
+                onEstudianteChange={(e) => {
+                  setEstudianteSeleccionado(e);
+                  setEstudiantes(prev => prev.map(s => s.id === e.id ? e : s));
+                }}
+                onInformeChange={updateCurrentInforme}
               />
             )}
 
             {currentTab === 'motivo' && (
               <SectionMotivo
                 informe={informe}
-                onInformeChange={setInforme}
+                onInformeChange={updateCurrentInforme}
               />
             )}
 
             {currentTab === 'antecedentes' && (
               <SectionAntecedentes
                 informe={informe}
-                onInformeChange={setInforme}
+                onInformeChange={updateCurrentInforme}
               />
             )}
 
             {currentTab === 'evaluacion-cuantitativa' && (
               <InformalEvaluationEditor
                 bateria={informe.evaluacionInformal}
-                onChange={(nuevaBateria) => setInforme({ ...informe, evaluacionInformal: nuevaBateria })}
+                onChange={(nuevaBateria) => updateCurrentInforme({ ...informe, evaluacionInformal: nuevaBateria })}
                 onGenerarAnalisis={handleGenerarIA}
               />
             )}
@@ -273,7 +380,7 @@ export function App() {
               <SectionAnalisisCualitativo
                 estudiante={estudianteSeleccionado}
                 informe={informe}
-                onInformeChange={setInforme}
+                onInformeChange={updateCurrentInforme}
                 onGenerarIA={handleGenerarIA}
               />
             )}
@@ -281,21 +388,21 @@ export function App() {
             {currentTab === 'sintesis' && (
               <SectionSintesis
                 informe={informe}
-                onInformeChange={setInforme}
+                onInformeChange={updateCurrentInforme}
               />
             )}
 
             {currentTab === 'sugerencias' && (
               <SectionSugerencias
                 informe={informe}
-                onInformeChange={setInforme}
+                onInformeChange={updateCurrentInforme}
               />
             )}
 
             {currentTab === 'pauta-observacion' && (
               <PautaObservacionEditor
                 pauta={informe.pautaObservacion}
-                onChange={(nuevaPauta) => setInforme({ ...informe, pautaObservacion: nuevaPauta })}
+                onChange={(nuevaPauta) => updateCurrentInforme({ ...informe, pautaObservacion: nuevaPauta })}
               />
             )}
 
@@ -320,13 +427,13 @@ export function App() {
               <BancoEvaluacionesView
                 nivelActual={informe.evaluacionInformal.cursoNivel}
                 onSelectNivel={(nivel) => {
-                  setInforme(prev => ({
-                    ...prev,
+                  updateCurrentInforme({
+                    ...informe,
                     evaluacionInformal: {
-                      ...prev.evaluacionInformal,
+                      ...informe.evaluacionInformal,
                       cursoNivel: nivel
                     }
-                  }));
+                  });
                   setCurrentTab('evaluacion-cuantitativa');
                   showToast(`Batería actualizada al nivel: ${nivel}`);
                 }}
@@ -344,7 +451,7 @@ export function App() {
             }`}
           >
             <LayoutDashboard className="w-4 h-4 text-teal-600" />
-            <span>Diversi PIE</span>
+            <span>{esDiversi ? 'Diversi' : 'Evaluación'}</span>
           </button>
 
           <button
@@ -378,11 +485,11 @@ export function App() {
           </button>
 
           <button
-            onClick={() => setIsMobileMenuOpen(true)}
+            onClick={() => setIsStudentModalOpen(true)}
             className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500 active:text-teal-700"
           >
             <Menu className="w-4 h-4" />
-            <span>Menú</span>
+            <span>Alumnos</span>
           </button>
         </nav>
       </div>

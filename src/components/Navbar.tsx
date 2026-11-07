@@ -5,7 +5,8 @@ import {
   Printer, 
   Save, 
   Unlock, 
-  Menu
+  Menu,
+  Users
 } from 'lucide-react';
 import { EstudiantePIE, InformePIE } from '../types/pie';
 
@@ -17,6 +18,7 @@ interface NavbarProps {
   onImprimir: () => void;
   onGuardar: () => void;
   onOpenMobileMenu: () => void;
+  onOpenGestionEstudiantes: () => void;
   isSaving?: boolean;
 }
 
@@ -28,8 +30,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   onImprimir,
   onGuardar,
   onOpenMobileMenu,
+  onOpenGestionEstudiantes,
   isSaving = false
 }) => {
+  const esDiversi = (estudiante.tipoEvaluacion || 'diversi') === 'diversi';
+
   return (
     <header className="bg-white border-b border-slate-200 px-3 md:px-6 py-2.5 md:h-16 flex flex-col md:flex-row md:items-center justify-between sticky top-0 z-30 shadow-xs gap-2.5">
       {/* Top Row: Hamburger + Student Identity */}
@@ -46,12 +51,25 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium truncate">
-              <span className="hidden sm:inline">Estudiantes /</span>
-              <span className="text-teal-700 font-bold truncate max-w-[150px] sm:max-w-none">
+              <span className="hidden sm:inline">Estudiante:</span>
+              <span className="text-slate-900 font-bold truncate max-w-[150px] sm:max-w-none">
                 {estudiante.nombreCompleto}
               </span>
+              <button
+                onClick={onOpenGestionEstudiantes}
+                className="ml-1 text-[10px] text-teal-700 hover:text-teal-900 font-bold underline flex items-center gap-0.5"
+              >
+                <span>(Cambiar / Agregar)</span>
+              </button>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              <span className={`text-[10px] font-bold px-2 py-0.2 rounded-full border ${
+                esDiversi
+                  ? 'bg-teal-50 text-teal-800 border-teal-300'
+                  : 'bg-indigo-50 text-indigo-800 border-indigo-300'
+              }`}>
+                {esDiversi ? '🟢 Batería Diversi' : '🟣 Batería Tabulatest'}
+              </span>
               <h1 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
                 {informe.periodo} PIE • {estudiante.curso}
               </h1>
@@ -63,17 +81,26 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Status pill (mobile compact) */}
-        <div className="flex md:hidden items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
-          <Unlock className="w-3 h-3 text-emerald-600" />
-          <span>Gratis</span>
+        <div className="flex md:hidden items-center gap-1">
+          <button
+            onClick={onOpenGestionEstudiantes}
+            className="p-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1"
+          >
+            <Users className="w-3.5 h-3.5 text-teal-600" />
+            <span className="text-[10px]">+ Estudiantes</span>
+          </button>
         </div>
       </div>
 
-      {/* Center status pill for desktop */}
-      <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs shrink-0">
-        <Unlock className="w-3.5 h-3.5 text-emerald-600" />
-        <span className="font-medium text-slate-700">Sistema Desbloqueado:</span>
-        <span className="font-bold text-emerald-600">Tokens Ilimitados & IA Libre</span>
+      {/* Center status button for desktop */}
+      <div className="hidden lg:flex items-center gap-2">
+        <button
+          onClick={onOpenGestionEstudiantes}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs text-slate-700 font-bold transition"
+        >
+          <Users className="w-3.5 h-3.5 text-teal-600" />
+          <span>Administrar Estudiantes ({esDiversi ? 'Diversi' : 'Tabulatest'})</span>
+        </button>
       </div>
 
       {/* Action buttons (scroll horizontally or wrap cleanly on mobile) */}

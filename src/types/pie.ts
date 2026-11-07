@@ -1,5 +1,7 @@
 export type LogroNivel = 'Bueno' | 'Medio' | 'Por desarrollar' | 'Sin evaluar';
 
+export type TipoEvaluacionSistema = 'diversi' | 'tabulatest';
+
 export interface EvaluacionItem {
   id: string;
   numero: number;
@@ -26,6 +28,7 @@ export interface BateriaEvaluacionInformal {
   id: string;
   nombre: string;
   cursoNivel: string; // ej: "1° Medio", "8° Básico", etc.
+  sistema?: TipoEvaluacionSistema;
   areas: AreaEvaluacion[];
 }
 
@@ -52,6 +55,7 @@ export interface PautaObservacion {
 export interface InformePIE {
   id: string;
   estudianteId: string;
+  tipoEvaluacion: TipoEvaluacionSistema; // 'diversi' | 'tabulatest' (exclusiva, no ambas)
   fechaCreacion: string;
   fechaInforme: string;
   fechaEmisionDiagnostico: string;
@@ -116,9 +120,11 @@ export interface EstudiantePIE {
   fechaNacimiento: string;
   edad: string;
   curso: string;
+  establecimiento?: string;
   tipoNEE: 'NEET' | 'NEEP';
   diagnostico: string;
   siglaDiagnostico: string;
+  tipoEvaluacion: TipoEvaluacionSistema; // 'diversi' | 'tabulatest'
   apoderadoNombre: string;
   apoderadoTelefono: string;
   informeIdActual?: string;

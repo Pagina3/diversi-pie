@@ -7,7 +7,8 @@ import {
   ShieldCheck,
   X,
   ClipboardList,
-  Sparkles,
+  UserPlus,
+  Users,
   LayoutDashboard
 } from 'lucide-react';
 import { EstudiantePIE } from '../types/pie';
@@ -19,6 +20,7 @@ interface SidebarProps {
   estudianteSeleccionado: EstudiantePIE;
   setEstudianteSeleccionado: (e: EstudiantePIE) => void;
   onOpenNormativa: () => void;
+  onOpenGestionEstudiantes: () => void;
   isMobileOpen: boolean;
   setIsMobileOpen: (open: boolean) => void;
 }
@@ -30,15 +32,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   estudianteSeleccionado,
   setEstudianteSeleccionado,
   onOpenNormativa,
+  onOpenGestionEstudiantes,
   isMobileOpen,
   setIsMobileOpen,
 }) => {
+  const esDiversi = (estudianteSeleccionado.tipoEvaluacion || 'diversi') === 'diversi';
+
   const seccionesInformeDiversi = [
     { id: 'identificacion', label: 'I. Identificación', badge: 'Listo' },
     { id: 'motivo', label: 'II. Motivo de evaluación', badge: 'Listo' },
     { id: 'antecedentes', label: 'III. Historia escolar y familiar', badge: 'Listo' },
-    { id: 'evaluacion-cuantitativa', label: 'IV. Ev. Informal Diversi (Puntajes)', badge: 'Activo' },
-    { id: 'analisis-cualitativo', label: 'IV. Análisis cualitativo (Redacción)', badge: 'Activo' },
+    { id: 'evaluacion-cuantitativa', label: 'IV. Ev. Informal (Puntajes)', badge: 'Activo' },
+    { id: 'analisis-cualitativo', label: 'IV. Análisis cualitativo', badge: 'Activo' },
     { id: 'sintesis', label: 'V. Síntesis diagnóstica', badge: 'Listo' },
     { id: 'sugerencias', label: 'VI. Sugerencias y PACI', badge: 'Listo' },
     { id: 'pauta-observacion', label: 'VII. Pauta observación Mineduc', badge: 'Cartilla 4' },
@@ -73,7 +78,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               alt="Diversi" 
               className="h-7 w-auto object-contain"
               onError={(e) => {
-                // If image fails, show fallback badge
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
@@ -96,14 +100,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Student Quick Switcher */}
-        <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/60">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-medium mb-1.5">
+        {/* Student Quick Switcher with Add Button */}
+        <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/60 space-y-2">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
             <span>Estudiante en curso</span>
-            <span className="text-[10px] text-teal-400 bg-teal-950/80 px-1.5 py-0.5 rounded border border-teal-800/60 font-bold">
-              {estudianteSeleccionado.siglaDiagnostico}
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold border ${
+              esDiversi 
+                ? 'text-teal-300 bg-teal-950 border-teal-700' 
+                : 'text-indigo-300 bg-indigo-950 border-indigo-700'
+            }`}>
+              {esDiversi ? '🟢 Batería Diversi' : '🟣 Batería Tabulatest'}
             </span>
           </div>
+
           <select
             value={estudianteSeleccionado.id}
             onChange={(e) => {
@@ -117,57 +126,73 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             {estudiantes.map((st) => (
               <option key={st.id} value={st.id}>
-                {st.nombreCompleto} ({st.curso})
+                {st.nombreCompleto} ({st.curso}) - {st.tipoEvaluacion === 'diversi' ? 'Diversi' : 'Tabulatest'}
               </option>
             ))}
           </select>
+
+          {/* Botón para Administrar / Agregar más estudiantes */}
+          <button
+            onClick={() => {
+              onOpenGestionEstudiantes();
+              setIsMobileOpen(false);
+            }}
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-teal-300 rounded-lg text-[11px] font-bold border border-slate-700 transition"
+          >
+            <Users className="w-3.5 h-3.5 text-teal-400" />
+            <span>+ Administrar / Agregar Estudiantes</span>
+          </button>
         </div>
 
         {/* Navigation Sections */}
         <div className="flex-1 overflow-y-auto py-3 px-2 space-y-4 custom-scrollbar text-xs">
-          {/* Main platforms switcher */}
+          {/* Main platforms switcher (mutually exclusive) */}
           <div>
             <div className="px-2.5 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Plataformas & Vistas
+              Sistema Asignado al Estudiante:
             </div>
             <div className="space-y-1">
-              {/* DIVERSI PRINCIPAL BUTTON */}
+              {/* Opción 1: DIVERSI */}
               <button
                 onClick={() => handleTabClick('evaluacion-cuantitativa')}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold transition-all ${
-                  currentTab === 'evaluacion-cuantitativa' || currentTab === 'analisis-cualitativo' || currentTab === 'identificacion' || currentTab === 'motivo' || currentTab === 'antecedentes' || currentTab === 'sintesis' || currentTab === 'sugerencias' || currentTab === 'pauta-observacion'
+                  esDiversi && (currentTab === 'evaluacion-cuantitativa' || currentTab === 'analisis-cualitativo' || currentTab === 'identificacion' || currentTab === 'motivo' || currentTab === 'antecedentes' || currentTab === 'sintesis' || currentTab === 'sugerencias' || currentTab === 'pauta-observacion')
                     ? 'bg-teal-600 text-white shadow-md shadow-teal-900/40'
-                    : 'hover:bg-slate-800/70 text-slate-200 bg-slate-900/40 border border-slate-800'
+                    : 'hover:bg-slate-800/70 text-slate-300 bg-slate-900/40 border border-slate-800'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 truncate">
                   <LayoutDashboard className="w-4 h-4 text-teal-300 shrink-0" />
-                  <span className="text-left font-bold">Plataforma Diversi PIE</span>
+                  <span className="truncate">Plataforma Diversi PIE</span>
                 </div>
-                <span className="text-[10px] bg-teal-400/20 text-teal-200 px-1.5 py-0.5 rounded font-mono">
-                  Principal
-                </span>
+                {esDiversi && (
+                  <span className="text-[9px] bg-teal-400/20 text-teal-200 px-1.5 py-0.5 rounded font-mono shrink-0">
+                    Asignada
+                  </span>
+                )}
               </button>
 
-              {/* TABULATEST BUTTON */}
+              {/* Opción 2: TABULATEST */}
               <button
                 onClick={() => handleTabClick('tabulatest')}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all ${
-                  currentTab === 'tabulatest'
+                  !esDiversi || currentTab === 'tabulatest'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50'
                     : 'hover:bg-slate-800/70 text-slate-300 bg-slate-900/40 border border-slate-800'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 truncate">
                   <ClipboardList className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span>Módulo Tabulatest (R-3)</span>
+                  <span className="truncate">Módulo Tabulatest (R-3)</span>
                 </div>
-                <span className="text-[9px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-1.5 py-0.5 rounded font-mono">
-                  Nuevo
-                </span>
+                {!esDiversi && (
+                  <span className="text-[9px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-1.5 py-0.5 rounded font-mono shrink-0">
+                    Asignada
+                  </span>
+                )}
               </button>
 
-              {/* VISTA PREVIA Y DESCARGAS */}
+              {/* VISTA PREVIA Y EXPEDIENTE */}
               <button
                 onClick={() => handleTabClick('vista-previa')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-colors ${
@@ -191,26 +216,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <Folder className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>Carpeta del Estudiante (Expediente)</span>
               </button>
-
-              <button
-                onClick={() => handleTabClick('evaluaciones-banco')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-colors ${
-                  currentTab === 'evaluaciones-banco'
-                    ? 'bg-teal-500/15 text-teal-300 font-semibold border-l-2 border-teal-400'
-                    : 'hover:bg-slate-800/60 text-slate-300'
-                }`}
-              >
-                <BookOpen className="w-4 h-4 text-sky-400 shrink-0" />
-                <span>Banco de Ev. Informales (PreK - 4°M)</span>
-              </button>
             </div>
           </div>
 
-          {/* Section: Informe Psicopedagógico Diversi (Desplegado) */}
+          {/* Section: Informe Psicopedagógico (7 Secciones) */}
           <div>
             <div className="px-2.5 mb-1.5 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <span>Secciones Diversi (Mineduc)</span>
-              <span className="text-[10px] text-teal-400 font-mono">7 Pasos</span>
+              <span>Secciones del Informe</span>
+              <span className="text-[10px] text-teal-400 font-mono">Cartilla 4</span>
             </div>
             <div className="space-y-0.5">
               {seccionesInformeDiversi.map((sec) => (

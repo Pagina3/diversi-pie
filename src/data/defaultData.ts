@@ -1,4 +1,4 @@
-import type { EstudiantePIE, InformePIE, BateriaEvaluacionInformal } from '../types/pie';
+import type { EstudiantePIE, InformePIE, BateriaEvaluacionInformal, TipoEvaluacionSistema } from '../types/pie';
 
 export const indicadoresPedagogicosBase = [
   "Demuestra comprensión de instrucciones orales, escritas o en lengua de señas, respondiendo a ellas de acuerdo con sus posibilidades comunicativas y utilizando los apoyos necesarios.",
@@ -30,6 +30,7 @@ export const bateria1MedioDiversi: BateriaEvaluacionInformal = {
   id: "bateria-1-medio-diversi",
   nombre: "Evaluación psicopedagógica informal - Diversi",
   cursoNivel: "1° Medio",
+  sistema: "diversi",
   areas: [
     {
       id: "area-cognitiva",
@@ -125,6 +126,7 @@ export const bateriasTabulatestCatalogo: BateriaEvaluacionInformal[] = [
     id: "tabulatest-r3-basica-4",
     nombre: "Prueba Informal Psicopedagógica Tabulatest (R-3) - 4° Básico",
     cursoNivel: "4° Básico",
+    sistema: "tabulatest",
     areas: [
       {
         id: "tab-cog-4",
@@ -185,6 +187,7 @@ export const bateriasTabulatestCatalogo: BateriaEvaluacionInformal[] = [
     id: "tabulatest-r3-basica-8",
     nombre: "Prueba Informal Psicopedagógica Tabulatest (R-3) - 8° Básico",
     cursoNivel: "8° Básico",
+    sistema: "tabulatest",
     areas: [
       {
         id: "tab-cog-8",
@@ -246,6 +249,7 @@ export const bateriasTabulatestCatalogo: BateriaEvaluacionInformal[] = [
     id: "tabulatest-fonoaudiologica",
     nombre: "Evaluación Informal Fonoaudiológica Tabulatest",
     cursoNivel: "Enseñanza Básica y Media",
+    sistema: "tabulatest",
     areas: [
       {
         id: "fono-fonetica",
@@ -293,28 +297,6 @@ export const bateriasTabulatestCatalogo: BateriaEvaluacionInformal[] = [
         ]
       }
     ]
-  },
-  {
-    id: "tabulatest-estilos-vak",
-    nombre: "Test de Estilos de Aprendizaje PNL - VAK (Tabulatest)",
-    cursoNivel: "Todos los niveles",
-    areas: [
-      {
-        id: "vak-canales",
-        nombre: "Canales de Percepción y Procesamiento",
-        subareas: [
-          {
-            id: "sub-vak",
-            nombre: "Predominancia Perceptual",
-            items: [
-              { id: "vak-1", numero: 1, nombre: "Canal Visual (imágenes, esquemas, lectura visual)", ptjeIdeal: 20, ptjeObtenido: 16 },
-              { id: "vak-2", numero: 2, nombre: "Canal Auditivo (explicaciones orales, debate, repetición)", ptjeIdeal: 20, ptjeObtenido: 11 },
-              { id: "vak-3", numero: 3, nombre: "Canal Kinestésico (manipulación, acción corporal, práctica)", ptjeIdeal: 20, ptjeObtenido: 18 }
-            ]
-          }
-        ]
-      }
-    ]
   }
 ];
 
@@ -326,9 +308,11 @@ export const estudianteInicial: EstudiantePIE = {
   fechaNacimiento: "2012-05-20",
   edad: "14 años, 5 meses",
   curso: "1° Medio A",
+  establecimiento: "Colegio Ana María Janer",
   tipoNEE: "NEET",
   diagnostico: "Trastorno de Déficit Atencional con Hiperactividad",
   siglaDiagnostico: "TDA-H",
+  tipoEvaluacion: "diversi", // Exclusiva: usa Batería Diversi
   apoderadoNombre: "Patricia Parra",
   apoderadoTelefono: "+56 9 8765 4321",
   informeIdActual: "51895"
@@ -344,9 +328,11 @@ export const otrosEstudiantes: EstudiantePIE[] = [
     fechaNacimiento: "2013-09-14",
     edad: "13 años, 2 meses",
     curso: "8° Básico B",
+    establecimiento: "Colegio Ana María Janer",
     tipoNEE: "NEEP",
     diagnostico: "Trastorno del Espectro Autista",
     siglaDiagnostico: "TEA-A",
+    tipoEvaluacion: "tabulatest", // Exclusiva: usa Batería Tabulatest R-3
     apoderadoNombre: "Claudia Soto",
     apoderadoTelefono: "+56 9 7654 3210"
   },
@@ -358,28 +344,96 @@ export const otrosEstudiantes: EstudiantePIE[] = [
     fechaNacimiento: "2011-11-03",
     edad: "15 años, 0 meses",
     curso: "2° Medio C",
+    establecimiento: "Colegio Ana María Janer",
     tipoNEE: "NEET",
     diagnostico: "Dificultad Específica del Aprendizaje (Lectoescritura)",
     siglaDiagnostico: "DEA",
+    tipoEvaluacion: "tabulatest", // Exclusiva: usa Batería Tabulatest
     apoderadoNombre: "Rodrigo Muñoz",
     apoderadoTelefono: "+56 9 9123 4567"
   }
 ];
 
+export const profesorPredeterminado = {
+  nombre: "Francisca Lorena Tello Rojas",
+  rut: "21.232.592-9",
+  profesion: "Profesora Diferencial mención Discapacidad Intelectual",
+  registroMineduc: "145892",
+  cargo: "Educadora Diferencial PIE / Especialista"
+};
+
+export function crearInformeParaEstudiante(estudiante: EstudiantePIE): InformePIE {
+  const esDiversi = estudiante.tipoEvaluacion === 'diversi';
+  const bateria = esDiversi 
+    ? bateria1MedioDiversi 
+    : (bateriasTabulatestCatalogo.find(b => b.id === 'tabulatest-r3-basica-8') || bateriasTabulatestCatalogo[1]);
+
+  const instrumentoNombre = esDiversi 
+    ? "Evaluación psicopedagógica informal - Diversi (Nivel 1° Medio)"
+    : `${bateria.nombre} (Tabulatest.cl R-3)`;
+
+  return {
+    id: `inf-${estudiante.id}`,
+    estudianteId: estudiante.id,
+    tipoEvaluacion: estudiante.tipoEvaluacion,
+    fechaCreacion: new Date().toISOString().split('T')[0],
+    fechaInforme: new Date().toISOString().split('T')[0],
+    fechaEmisionDiagnostico: "2025-03-12",
+    periodo: "Reevaluación",
+    estado: "En proceso",
+    establecimiento: estudiante.establecimiento || "Colegio Ana María Janer",
+    rbd: "9876-5",
+    motivoDetalle: `Proceso de Reevaluación Integral del Programa de Integración Escolar (PIE) según normativa Decreto 170 y Decreto 83 de Educación Especial del Ministerio de Educación de Chile mediante ${instrumentoNombre}.`,
+    instrumentosAplicados: `${instrumentoNombre}, Pauta de Observación Pedagógica en el Contexto Escolar (Cartilla 4 MINEDUC), Entrevista a la familia y revisión de antecedentes escolares previos.`,
+    antecedentesHistoriaEscolar: `El/la estudiante cursa ${estudiante.curso}. Ha contado con apoyo del PIE en años anteriores bajo diagnóstico de ${estudiante.diagnostico}. Presenta buen desempeño vincular con sus pares y docentes, sin embargo, en periodos de alta exigencia académica muestra dificultades para estructuración temporal de tareas.`,
+    antecedentesSaludFamilia: "Vive con sus padres. La familia muestra alto compromiso y asistencia a citaciones del equipo de aula. Cuenta con control médico regular.",
+    evaluacionInformal: bateria,
+    analisisCualitativo: {
+      cognitivaYComunicativa: `En el área cognitiva y de funciones ejecutivas, el estudiante evaluado mediante ${instrumentoNombre} presenta fortalezas en razonamiento básico y comprensión de consignas claras. Requiere andamiaje en memoria operativa y planificación temporal.`,
+      socioemocionalYAproximacion: "Muestra motivación intrínseca cuando las actividades incorporan recursos interactivos o trabajos prácticos. En situaciones de frustración académica manifiesta ansiedad transitoria regulable con mediación docente.",
+      motoraAutonomiaYSensorial: "Presenta adecuada motricidad fina y gruesa. Es autónomo en su cuidado personal y desplazamiento dentro del establecimiento."
+    },
+    sintesis: {
+      cognitivaYComunicativa: "Fortalezas en razonamiento analógico. Barreras en memoria de trabajo y autorregulación del tiempo.",
+      socioemocionalYAproximacion: "Excelente receptividad al apoyo pedagógico y disposición al trabajo colaborativo.",
+      motoraAutonomiaYSensorial: "Sin observaciones críticas en el plano motor ni sensorial.",
+      conclusion: `El estudiante requiere continuar en el Programa de Integración Escolar (PIE) bajo adecuaciones curriculares de acceso y diversificación de la enseñanza (${esDiversi ? 'Modelo Diversi' : 'Modelo Tabulatest R-3'} / Cartilla 4 MINEDUC).`
+    },
+    sugerencias: {
+      alEstablecimiento: "Garantizar la aplicación de los principios del Diseño Universal para el Aprendizaje (DUA) en las evaluaciones de nivel.",
+      alEquipoAula: "Segmentar las instrucciones largas en pasos numerados. Asignar asiento preferencial. Otorgar tiempos adicionales en evaluaciones escritas.",
+      alEstudiante: "Utilizar agenda visual o digital con alarmas para entregas. Aplicar técnicas de estudio fraccionadas.",
+      aLaFamilia: "Mantener un ambiente libre de distractores durante el horario de estudio en el hogar. Supervisar la agenda escolar diariamente.",
+      otros: "Mantener coordinación bimensual con equipo médico tratante y equipo psicosocial."
+    },
+    pautaObservacion: {
+      antecedentesPedagogicos: indicadoresPedagogicosBase.map((texto, i) => ({
+        id: `ped-${i+1}`,
+        texto,
+        valor: i === 0 || i === 5 || i === 8 ? '3' : i === 2 || i === 3 ? '1' : '2'
+      })),
+      antecedentesSocialesComunicativos: indicadoresSocialesBase.map((texto, i) => ({
+        id: `soc-${i+1}`,
+        texto,
+        valor: i === 0 || i === 1 || i === 8 || i === 9 ? '3' : '2'
+      })),
+      observacionesGenerales: "Estudiante colaborativo en aula, su mayor necesidad radica en la contención de distractores externos.",
+      docenteAulaRegular: {
+        nombre: "María Elena Morales",
+        rut: "14.285.932-4",
+        profesion: "Profesora de Educación Media",
+        asignatura: "Lenguaje y Comunicación"
+      }
+    },
+    profesional: profesorPredeterminado
+  };
+}
+
 export const informeInicial: InformePIE = {
+  ...crearInformeParaEstudiante(estudianteInicial),
   id: "51895",
   estudianteId: "3400",
-  fechaCreacion: "2026-11-05",
-  fechaInforme: "2026-11-07",
-  fechaEmisionDiagnostico: "2025-03-12",
-  periodo: "Reevaluación",
-  estado: "En proceso",
-  establecimiento: "Colegio Ana María Janer",
-  rbd: "9876-5",
-  motivoDetalle: "Proceso de Reevaluación Integral del Programa de Integración Escolar (PIE) según normativa Decreto 170 y Decreto 83 de Educación Especial del Ministerio de Educación de Chile.",
-  instrumentosAplicados: "Evaluación psicopedagógica informal - Diversi (Nivel 1° Medio), Prueba Informal Tabulatest (R-3), Pauta de Observación Pedagógica en el Contexto Escolar (Cartilla 4 MINEDUC), Entrevista a la familia y revisión de antecedentes escolares previos.",
-  antecedentesHistoriaEscolar: "La estudiante cursa 1° Medio. Ha contado con apoyo del PIE en años anteriores bajo diagnóstico de TDAH. Presenta buen desempeño vincular con sus pares y docentes, sin embargo, en periodos de alta exigencia académica muestra dificultades para sostener la concentración en actividades de extensa duración y estructuración temporal de tareas.",
-  antecedentesSaludFamilia: "Vive con sus padres y hermano menor. La familia muestra alto compromiso y asistencia a citaciones del equipo de aula. Cuenta con control neurológico regular.",
+  tipoEvaluacion: "diversi",
   evaluacionInformal: bateria1MedioDiversi,
   analisisCualitativo: {
     cognitivaYComunicativa: "En el área cognitiva, la estudiante evidencia fortalezas en atención focalizada inmediata y organización de secuencias conocidas (100% en ítems 1 y 3). Presenta desafíos significativos en memoria operativa de trabajo (29% de logro) y en tareas de resolución de problemas complejos que exigen flexibilidad cognitiva y cambio de set mental (0%), donde suele dispersarse ante enunciados largos o con múltiples distractores. En lenguaje verbal, logra buen nivel en comprensión literal y determinación de ideas centrales en textos breves (100%), no obstante, decae en inferencias complejas, vocabulario contextual abstracto y expresión escrita formal (42%), requiriendo apoyos visuales y andamiaje para la redacción de párrafos argumentativos.",
@@ -392,37 +446,5 @@ export const informeInicial: InformePIE = {
     motoraAutonomiaYSensorial: "Sin observaciones críticas en el plano motor ni sensorial.",
     conclusion: "La estudiante requiere continuar en el Programa de Integración Escolar (PIE) bajo apoyos de aula común y aula de recursos (PACI de acceso y temporalidad) conforme a las directrices de la Cartilla 4 y 5 del MINEDUC."
   },
-  sugerencias: {
-    alEstablecimiento: "Garantizar la aplicación de los principios del Diseño Universal para el Aprendizaje (DUA) en las evaluaciones de nivel, permitiendo formatos diversificados (orales, digitales o rúbricas segmentadas).",
-    alEquipoAula: "Segmentar las instrucciones largas en pasos numerados. Asignar asiento preferencial cercano al docente y alejado de ventanas. Otorgar tiempos adicionales (25% a 30%) en evaluaciones escritas. Monitorear activamente el inicio de las tareas.",
-    alEstudiante: "Utilizar agenda visual o digital con alarmas para entregas. Aplicar técnicas de estudio fraccionadas (método Pomodoro). Solicitar aclaración de dudas de manera oportuna.",
-    aLaFamilia: "Mantener un ambiente libre de distractores durante el horario de estudio en el hogar. Supervisar la agenda escolar diariamente. Reforzar positivamente los avances y la persistencia antes que solo el resultado final.",
-    otros: "Mantener coordinación bimensual con neurólogo tratante y equipo psicosocial."
-  },
-  pautaObservacion: {
-    antecedentesPedagogicos: indicadoresPedagogicosBase.map((texto, i) => ({
-      id: `ped-${i+1}`,
-      texto,
-      valor: i === 0 || i === 5 || i === 8 ? '3' : i === 2 || i === 3 ? '1' : '2'
-    })),
-    antecedentesSocialesComunicativos: indicadoresSocialesBase.map((texto, i) => ({
-      id: `soc-${i+1}`,
-      texto,
-      valor: i === 0 || i === 1 || i === 8 || i === 9 ? '3' : '2'
-    })),
-    observacionesGenerales: "Fernanda es muy colaborativa en aula, su mayor necesidad radica en la contención de distractores externos y estructuración de sus tiempos de respuesta.",
-    docenteAulaRegular: {
-      nombre: "María Elena Morales",
-      rut: "14.285.932-4",
-      profesion: "Profesora de Educación Media en Lengua y Literatura",
-      asignatura: "Lenguaje y Comunicación"
-    }
-  },
-  profesional: {
-    nombre: "Francisca Lorena Tello Rojas",
-    rut: "21.232.592-9",
-    profesion: "Profesora Diferencial mención Discapacidad Intelectual",
-    registroMineduc: "145892",
-    cargo: "Educadora Diferencial PIE / Especialista"
-  }
+  profesional: profesorPredeterminado
 };
