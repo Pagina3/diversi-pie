@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Navbar } from './components/Navbar';
+import { DiversiStudentBanner } from './components/DiversiStudentBanner';
 import { SectionIdentificacion } from './components/SectionIdentificacion';
 import { SectionMotivo } from './components/SectionMotivo';
 import { SectionAntecedentes } from './components/SectionAntecedentes';
@@ -26,7 +27,8 @@ import {
   FileText, 
   FileCheck2, 
   ClipboardList, 
-  Menu 
+  Menu,
+  LayoutDashboard
 } from 'lucide-react';
 
 export function App() {
@@ -61,7 +63,8 @@ export function App() {
     return informeInicial;
   });
 
-  const [currentTab, setCurrentTab] = useState<string>('tabulatest');
+  // Default to Diversi's Informal Evaluation tabulator
+  const [currentTab, setCurrentTab] = useState<string>('evaluacion-cuantitativa');
   const [isModalNormativaOpen, setIsModalNormativaOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -154,8 +157,19 @@ export function App() {
         ? prev.instrumentosAplicados
         : `${prev.instrumentosAplicados}, ${bateria.nombre}`
     }));
-    showToast(`Batería "${bateria.nombre}" vinculada al informe con éxito.`);
+    showToast(`Batería "${bateria.nombre}" cargada en el informe de Diversi.`);
   };
+
+  const isDiversiSection = [
+    'identificacion', 
+    'motivo', 
+    'antecedentes', 
+    'evaluacion-cuantitativa', 
+    'analisis-cualitativo', 
+    'sintesis', 
+    'sugerencias', 
+    'pauta-observacion'
+  ].includes(currentTab);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100 font-sans">
@@ -202,6 +216,18 @@ export function App() {
         {/* Scrollable Workspace */}
         <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 custom-scrollbar">
           <div className="max-w-5xl mx-auto">
+            {/* DIVERSI STUDENT BANNER: Displayed on all Diversi report sections */}
+            {isDiversiSection && (
+              <DiversiStudentBanner
+                estudiante={estudianteSeleccionado}
+                informe={informe}
+                currentTab={currentTab}
+                onSelectTab={setCurrentTab}
+                onGenerarIA={handleGenerarIA}
+              />
+            )}
+
+            {/* TABULATEST VIEW */}
             {currentTab === 'tabulatest' && (
               <TabulatestView
                 bateriaActual={informe.evaluacionInformal}
@@ -211,6 +237,7 @@ export function App() {
               />
             )}
 
+            {/* DIVERSI REPORT SECTIONS */}
             {currentTab === 'identificacion' && (
               <SectionIdentificacion
                 estudiante={estudianteSeleccionado}
@@ -311,6 +338,16 @@ export function App() {
         {/* MOBILE STICKY BOTTOM NAVIGATION BAR */}
         <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-30 px-2 py-1.5 flex items-center justify-around shadow-lg">
           <button
+            onClick={() => setCurrentTab('evaluacion-cuantitativa')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition ${
+              isDiversiSection && currentTab === 'evaluacion-cuantitativa' ? 'text-teal-700 bg-teal-50' : 'text-slate-500'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4 text-teal-600" />
+            <span>Diversi PIE</span>
+          </button>
+
+          <button
             onClick={() => setCurrentTab('tabulatest')}
             className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition ${
               currentTab === 'tabulatest' ? 'text-indigo-700 bg-indigo-50' : 'text-slate-500'
@@ -318,16 +355,6 @@ export function App() {
           >
             <ClipboardList className="w-4 h-4" />
             <span>Tabulatest</span>
-          </button>
-
-          <button
-            onClick={() => setCurrentTab('evaluacion-cuantitativa')}
-            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-[10px] font-semibold transition ${
-              currentTab === 'evaluacion-cuantitativa' ? 'text-teal-700 bg-teal-50' : 'text-slate-500'
-            }`}
-          >
-            <Calculator className="w-4 h-4" />
-            <span>Puntajes</span>
           </button>
 
           <button

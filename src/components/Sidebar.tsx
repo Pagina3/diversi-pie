@@ -6,9 +6,9 @@ import {
   FileCheck2, 
   ShieldCheck,
   X,
-  Layers,
+  ClipboardList,
   Sparkles,
-  ClipboardList
+  LayoutDashboard
 } from 'lucide-react';
 import { EstudiantePIE } from '../types/pie';
 
@@ -33,12 +33,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen,
   setIsMobileOpen,
 }) => {
-  const seccionesInforme = [
+  const seccionesInformeDiversi = [
     { id: 'identificacion', label: 'I. Identificación', badge: 'Listo' },
     { id: 'motivo', label: 'II. Motivo de evaluación', badge: 'Listo' },
     { id: 'antecedentes', label: 'III. Historia escolar y familiar', badge: 'Listo' },
-    { id: 'evaluacion-cuantitativa', label: 'IV. Evaluación informal (Puntajes)', badge: 'Activo' },
-    { id: 'analisis-cualitativo', label: 'IV. Análisis cualitativo', badge: 'Activo' },
+    { id: 'evaluacion-cuantitativa', label: 'IV. Ev. Informal Diversi (Puntajes)', badge: 'Activo' },
+    { id: 'analisis-cualitativo', label: 'IV. Análisis cualitativo (Redacción)', badge: 'Activo' },
     { id: 'sintesis', label: 'V. Síntesis diagnóstica', badge: 'Listo' },
     { id: 'sugerencias', label: 'VI. Sugerencias y PACI', badge: 'Listo' },
     { id: 'pauta-observacion', label: 'VII. Pauta observación Mineduc', badge: 'Cartilla 4' },
@@ -65,18 +65,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
           isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        {/* Brand Header */}
+        {/* Brand Header with Official Diversi Logo */}
         <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-500/20">
-              D
-            </div>
+          <div className="flex items-center gap-3">
+            <img 
+              src="./logo-diversi-white.png" 
+              alt="Diversi" 
+              className="h-7 w-auto object-contain"
+              onError={(e) => {
+                // If image fails, show fallback badge
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-white tracking-wide text-base">diversi</span>
-                <span className="text-[10px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded font-mono font-medium">PIE+</span>
+                <span className="text-[10px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded font-mono font-bold">PIE</span>
               </div>
-              <p className="text-[11px] text-slate-400">Gestión e Informes Escolares</p>
+              <p className="text-[10px] text-slate-400">Plataforma Académica Oficial</p>
             </div>
           </div>
 
@@ -94,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/60">
           <div className="flex items-center justify-between text-xs text-slate-400 font-medium mb-1.5">
             <span>Estudiante en curso</span>
-            <span className="text-[10px] text-teal-400 bg-teal-950/80 px-1 rounded border border-teal-800/60">
+            <span className="text-[10px] text-teal-400 bg-teal-950/80 px-1.5 py-0.5 rounded border border-teal-800/60 font-bold">
               {estudianteSeleccionado.siglaDiagnostico}
             </span>
           </div>
@@ -119,78 +125,101 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Navigation Sections */}
         <div className="flex-1 overflow-y-auto py-3 px-2 space-y-4 custom-scrollbar text-xs">
-          {/* Main section */}
+          {/* Main platforms switcher */}
           <div>
-            <div className="px-2.5 mb-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-              Módulos Generales
+            <div className="px-2.5 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Plataformas & Vistas
             </div>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
+              {/* DIVERSI PRINCIPAL BUTTON */}
+              <button
+                onClick={() => handleTabClick('evaluacion-cuantitativa')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold transition-all ${
+                  currentTab === 'evaluacion-cuantitativa' || currentTab === 'analisis-cualitativo' || currentTab === 'identificacion' || currentTab === 'motivo' || currentTab === 'antecedentes' || currentTab === 'sintesis' || currentTab === 'sugerencias' || currentTab === 'pauta-observacion'
+                    ? 'bg-teal-600 text-white shadow-md shadow-teal-900/40'
+                    : 'hover:bg-slate-800/70 text-slate-200 bg-slate-900/40 border border-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <LayoutDashboard className="w-4 h-4 text-teal-300 shrink-0" />
+                  <span className="text-left font-bold">Plataforma Diversi PIE</span>
+                </div>
+                <span className="text-[10px] bg-teal-400/20 text-teal-200 px-1.5 py-0.5 rounded font-mono">
+                  Principal
+                </span>
+              </button>
+
+              {/* TABULATEST BUTTON */}
+              <button
+                onClick={() => handleTabClick('tabulatest')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all ${
+                  currentTab === 'tabulatest'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50'
+                    : 'hover:bg-slate-800/70 text-slate-300 bg-slate-900/40 border border-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <ClipboardList className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <span>Módulo Tabulatest (R-3)</span>
+                </div>
+                <span className="text-[9px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-1.5 py-0.5 rounded font-mono">
+                  Nuevo
+                </span>
+              </button>
+
+              {/* VISTA PREVIA Y DESCARGAS */}
               <button
                 onClick={() => handleTabClick('vista-previa')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-medium transition-colors ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-colors ${
                   currentTab === 'vista-previa'
                     ? 'bg-teal-500/15 text-teal-300 font-semibold border-l-2 border-teal-400'
                     : 'hover:bg-slate-800/60 text-slate-300'
                 }`}
               >
                 <FileCheck2 className="w-4 h-4 text-teal-400 shrink-0" />
-                <span>Vista previa & Descargas</span>
+                <span>Vista Previa del Informe Word/PDF</span>
               </button>
+
               <button
                 onClick={() => handleTabClick('carpeta')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-medium transition-colors ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-colors ${
                   currentTab === 'carpeta'
                     ? 'bg-teal-500/15 text-teal-300 font-semibold border-l-2 border-teal-400'
                     : 'hover:bg-slate-800/60 text-slate-300'
                 }`}
               >
                 <Folder className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Carpeta del Estudiante</span>
+                <span>Carpeta del Estudiante (Expediente)</span>
               </button>
+
               <button
                 onClick={() => handleTabClick('evaluaciones-banco')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-medium transition-colors ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-colors ${
                   currentTab === 'evaluaciones-banco'
                     ? 'bg-teal-500/15 text-teal-300 font-semibold border-l-2 border-teal-400'
                     : 'hover:bg-slate-800/60 text-slate-300'
                 }`}
               >
                 <BookOpen className="w-4 h-4 text-sky-400 shrink-0" />
-                <span>Banco de Ev. Informales</span>
-              </button>
-              <button
-                onClick={() => handleTabClick('tabulatest')}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-colors ${
-                  currentTab === 'tabulatest'
-                    ? 'bg-teal-500/15 text-teal-300 font-semibold border-l-2 border-teal-400'
-                    : 'hover:bg-slate-800/60 text-slate-300'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 truncate">
-                  <ClipboardList className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span className="truncate">Módulo Tabulatest (R-3)</span>
-                </div>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 shrink-0 font-mono">
-                  Nuevo
-                </span>
+                <span>Banco de Ev. Informales (PreK - 4°M)</span>
               </button>
             </div>
           </div>
 
-          {/* Section: Informe Psicopedagógico */}
+          {/* Section: Informe Psicopedagógico Diversi (Desplegado) */}
           <div>
-            <div className="px-2.5 mb-1 flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-              <span>Informe Psicopedagógico</span>
-              <span className="text-[10px] text-teal-400 lowercase font-mono">mineduc</span>
+            <div className="px-2.5 mb-1.5 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <span>Secciones Diversi (Mineduc)</span>
+              <span className="text-[10px] text-teal-400 font-mono">7 Pasos</span>
             </div>
             <div className="space-y-0.5">
-              {seccionesInforme.map((sec) => (
+              {seccionesInformeDiversi.map((sec) => (
                 <button
                   key={sec.id}
                   onClick={() => handleTabClick(sec.id)}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
                     currentTab === sec.id
-                      ? 'bg-teal-600/20 text-white font-medium border-l-2 border-teal-400'
+                      ? 'bg-teal-600/30 text-white font-bold border-l-2 border-teal-400'
                       : 'hover:bg-slate-800/50 text-slate-300'
                   }`}
                 >
@@ -237,7 +266,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <p className="text-xs font-semibold text-white truncate" title="Francisca Lorena Tello Rojas">
                 Francisca Lorena Tello Rojas
               </p>
-              <p className="text-[10px] text-teal-400 truncate" title="RUT: 21.232.592-9">
+              <p className="text-[10px] text-teal-400 font-mono truncate" title="RUT: 21.232.592-9">
                 RUT: 21.232.592-9
               </p>
               <p className="text-[10px] text-slate-400 truncate" title="Profesora Diferencial mención Discapacidad Intelectual">
